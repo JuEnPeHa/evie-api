@@ -7,6 +7,26 @@ import PostRoutes from './routes/PostRoutes';
 import UserRoutes from './routes/UserRoutes';
 import indexRoutes from './routes/indexRoutes';
 import helmet from 'helmet';
+import NEARRoutes from './routes/NEARRoutes';
+// async function connectNEAR() {
+//     const near = await nearAPI.connect({
+//         networkId, nodeUrl, walletUrl,
+//     });
+// }
+
+    async function testNEAR() {
+//    const methodOptions = {
+//      viewMethods: ['nftTotalSupply'],
+//      changeMethods: []
+//    };
+//    const contract = new nearAPI.Contract(
+//     account,
+//      'paras-token-v2.testnet',
+//      methodOptions
+//    );
+    }
+
+
 
     async function connectDB() {
         const MONGO_URI = 'mongodb+srv://efwcwwwwce:7sPtSf8mzuTAqfGx@cluster0.w0ka0.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
@@ -25,9 +45,9 @@ class Server {
     config() {
         connectDB();
         this.app.set('port', process.env.PORT || 3000);
-        this.app.use(morgan('dev'));
         this.app.use(express.json());
         this.app.use(express.urlencoded({extended: false}));
+        this.app.use(morgan('dev'));
         this.app.use(helmet());
         this.app.use(compression());
         this.app.use(cors());
@@ -37,6 +57,7 @@ class Server {
         this.app.use(indexRoutes);
         this.app.use('/api/posts', PostRoutes);
         this.app.use('/api/users', UserRoutes);
+        this.app.use('/api/near', NEARRoutes);
     }
 
     start() {

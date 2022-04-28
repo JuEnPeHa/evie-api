@@ -17,7 +17,8 @@
     "helmet": "^5.0.2",
     "mongoose": "^6.3.1",
     "morgan": "^1.10.0",
-    "near-api-js": "^0.44.2"
+    "near-api-js": "^0.44.2",
+    "near-contract-parser": "^0.1.4"
   },
   "devDependencies": {
     "@types/compression": "^1.7.2",
