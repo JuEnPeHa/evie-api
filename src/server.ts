@@ -29,7 +29,7 @@ import NEARRoutes from './routes/NEARRoutes';
 
 
     async function connectDB() {
-        const MONGO_URI = 'mongodb+srv://efwcwwwwce:7sPtSf8mzuTAqfGx@cluster0.w0ka0.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
+        const MONGO_URI = '';
         const db = await mongoose.connect(MONGO_URI || process.env.MONGODB_URI).then(db => console.log('DB connected', db.connection.db.databaseName)).catch(err => console.log(err));
     }
 
