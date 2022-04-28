@@ -24,17 +24,44 @@ class NEARRoutes {
         this.routes();
     }
 
-    async getNftMetadata(req: Request, res: Response): Promise<void> {
-        const { receivedAccount, receivedContract } = req.body;
-        const account = await near.account(receivedAccount);
-        const contract: nearAPI.Contract = new nearAPI.Contract(
-            account,
-            receivedContract,
-            {
-                viewMethods: ['nft_metadata'],
-                changeMethods: []
+    getMarketplacesClean(listNftMarketplacesRaw: string[]) : string[] {
+        let listNftMarketplaces: string[] = [];
+        listNftMarketplacesRaw.forEach(
+            (marketplace: string) => {
+                if (marketplace.includes("mintbase") || 
+                marketplace.includes("paras") || 
+                marketplace.includes("neatar")) {
+                    listNftMarketplaces.push(marketplace);
+                }
             }
         );
+        return listNftMarketplaces;
+    }
+
+    async getMarketplacesNotEmpties(account: string, listNftMarketplacesRaw: string[]) : Promise<string[]> {
+        let listNftMarketplaces: string[] = [];
+        listNftMarketplacesRaw.forEach(
+            async (marketplace: string) => {
+                const supply = await this.getNftSupplyForOwnerPrivate(account, marketplace)
+                    if (supply != "0") {
+                        listNftMarketplaces.push(marketplace);
+                    }
+                }
+        );
+        return listNftMarketplaces;
+    }
+
+    async getNftMetadata(req: Request, res: Response): Promise<void> {
+        let receivedAccount: string = "";
+        let listReceivedContract: string[] = [];
+        let listReceivedContractClean: string[] = [];
+        let listReceivedContractNotEmpties: string[] = [];
+        let listTokens: any[] = [];
+        ({ receivedAccount, listReceivedContract } = req.body);
+        console.log(listReceivedContract);
+        listReceivedContractClean = this.getMarketplacesClean(listReceivedContract);
+        listReceivedContractNotEmpties = await this.getMarketplacesNotEmpties(receivedAccount, listReceivedContract);
+
         // @ts-ignore
         const metadata = contract.nft_metadata({
             
@@ -99,6 +126,30 @@ class NEARRoutes {
         res.json(supply);
    }
 
+   private async getNftSupplyForOwnerPrivate(
+        receivedAccount: string,
+        receivedContract: string
+   ): Promise<string> {
+        const account = await near.account(receivedAccount);
+        const contract: nearAPI.Contract = new nearAPI.Contract(
+            account,
+            receivedContract,
+            {
+                viewMethods: ['nft_supply_for_owner'],
+                changeMethods: []
+            }
+        );
+        // @ts-ignore
+        const supply = await contract.nft_supply_for_owner({
+            "account_id": receivedAccount
+        });
+        return supply;
+   }
+
+   async getAllNftsFromUser(req: Request, res: Response): Promise<void> {
+       const { receivedAccount, receivedContract } = req.body;
+   }
+
     routes() {
         this.router.get('/getSupply', this.getNftTotalSupply);
         this.router.post('/getSupply', this.getNftTotalSupply);
@@ -106,6 +157,8 @@ class NEARRoutes {
         this.router.post('/getTokens', this.getNftTokensForOwner);
         this.router.get('/getSupplyForOwner', this.getNftSupplyForOwner);
         this.router.post('/getSupplyForOwner', this.getNftSupplyForOwner);
+        this.router.get('/getMetadata', this.getNftMetadata);
+        this.router.post('/getMetadata', this.getNftMetadata);
     }
 }
 
